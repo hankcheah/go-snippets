@@ -10,17 +10,17 @@ Clone is a generic function that duplicates a channel. The number of duplicates 
 **[Example]**
 
 Say this is our current pipeline. intStream is consumed by a function call consumeOne. This is working fine, but what if we have another function consumeTwo that also needs to access the **entirety** of intStream? 
-<code>
+```
 intStream := make(chan int, 10)
 consumeOne(intStream)	// This is fine
 consumeTwo(intStream)   // This is not
-</code>
+```
 
 To solve this, we can create two clones of the channel, one for each of the consumers of the input channel.
 
-<code>
+```
 intStream := make(chan int, 10)
 intStreamChs := Clone(intStream, 2)
 consumeOne(<-intStreamChs)
 consumeTwo(<-intStreamChs)
-</code>
+```
