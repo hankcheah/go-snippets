@@ -1,5 +1,5 @@
 # go-snippets
-This repository contains some boilerplate code and helper functions for some of the more commonly repeated Go patterns.
+This repository contains boilerplate code and helper functions for some of the more commonly repeated Go patterns.
 
 ## *channel* package
 
