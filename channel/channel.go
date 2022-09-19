@@ -11,7 +11,7 @@ package channel
 //
 //  msgs := make(chan int, 5)
 //
-//  clonedChs := channel.clone(msgs, 2) // create two cloned channels
+//  clonedChs := channel.Clone(msgs, 2) // create two cloned channels
 // 
 //  outCh1 := <-clonedChs    // pop a cloned channel
 //  outCh2 := <-clonedChs    // pop a cloned channel
