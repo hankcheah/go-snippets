@@ -1,24 +1,28 @@
 package channel
 
-// Fanout forwards the message the input channel receives on to output channels that it creates.
+// Clone creates a number of duplicate channels based on the input channel.
+// It does this by forwarding the messages the input channel receives onto the output channels that it creates.
+// The number of clones this function creates depends on the <size> parameter the caller provides.
+//
 // It returns a channel of channels, more specifically, a read-only channel of read-only channels.
 // To use one of its output channels, just pop a channel from the returned channel.
 //
 // [Example]
 //
-//  oriMsgCh := make(chan int, 5)
+//  msgs := make(chan int, 5)
 //
-//  fanoutCh := fanout(oriInputCh, 2) // create two fanout channels
+//  clonedChs := channel.clone(msgs, 2) // create two cloned channels
 // 
-//  outCh1 := <-fanoutCh    // pop a channel
-//  outCh2 := <-fanoutCh    // pop a channel
+//  outCh1 := <-clonedChs    // pop a cloned channel
+//  outCh2 := <-clonedChs    // pop a cloned channel
 //
 //  oriMsgCh <- 123         // send 123 on the input channel
 //
 //  fmt.Println(<-outCh1)   // receive 123 on output channel 1
 //  fmt.Println(<-outCh2)   // receive 123 on output channel 2
 //
-func Fanout[T any](inCh chan T, size int) <-chan <-chan T {
+
+func Clone[T any](inCh chan T, size int) <-chan <-chan T {
     // The channel of channels to return at the end of this function call
     ret := make(chan (<-chan T), size)
 
@@ -32,7 +36,7 @@ func Fanout[T any](inCh chan T, size int) <-chan <-chan T {
         ret <- outChs[i]
     }
 
-    // Start a goroutine to manage receiving message from the input channels and fanning out to the output channels
+    // Start a goroutine to manage receiving message from the input channels and sending out to the output channels
     // Close the output channels if the input channel has been closed.
     go func () {
         for {

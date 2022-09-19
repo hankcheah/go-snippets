@@ -5,11 +5,11 @@ import (
     "reflect"
 )
 
-// TestFanoutBridge creates a one-to-one fanout or a bridge
+// TestCloneBridge creates a single duplicate, so it's like a bridge
 // The output should match the input
-func TestFanoutBridge(t *testing.T) {
+func TestCloneBridgeOne(t *testing.T) {
     inCh := make(chan int, 2)
-    outCh := <-Fanout(inCh, 1)
+    outCh := <-Clone(inCh, 1)
 
     inCh <- 1
     inCh <- 2
@@ -21,14 +21,31 @@ func TestFanoutBridge(t *testing.T) {
     }
 }
 
-// TestFanoutTwo creates a integer tee (one-to-two fanout) test it
-func TestFanoutTwoInt(t *testing.T) {
+// TestCloneBridge creates a single duplicate
+// The difference between this and TestCloneBridgeOne is that in this
+// test case, the values in the input channel is preloaded before it gets cloned.
+func TestCloneBridgeTwo(t *testing.T) {
+    inCh := make(chan int, 2)
+    inCh <- 1
+    inCh <- 2
+
+    outCh := <-Clone(inCh, 1)
+
+    res := []int{<-outCh, <-outCh}
+    expected := []int{1, 2}
+    if !reflect.DeepEqual(res, expected) {
+        t.Errorf("Expected output. Want: %v Got %v.", expected, res)
+    }
+}
+
+// TestCloneTwo tests a integer tee (one input channel cloned to two output channels)
+func TestCloneTwoInt(t *testing.T) {
     inCh := make(chan int, 3)
-    inChs := Fanout(inCh, 2)
+    outCh := Clone(inCh, 2)
 
     // Fan out to two output channels
-    outCh1 := <-inChs
-    outCh2 := <-inChs
+    outCh1 := <-outCh
+    outCh2 := <-outCh
 
     inCh <- 1
     inCh <- 2
@@ -41,10 +58,10 @@ func TestFanoutTwoInt(t *testing.T) {
     }
 }
 
-// TestFanoutTwo creates a string tee (one-to-two fanout) and test it
-func TestFanoutTwoString(t *testing.T) {
+// TestCloneTwo creates a a string tee using Clone and test its validity.
+func TestCloneTwoString(t *testing.T) {
     inCh := make(chan string, 2)
-    inChs := Fanout(inCh, 2)
+    inChs := Clone(inCh, 2)
 
     outCh1 := <-inChs
     outCh2 := <-inChs
@@ -60,16 +77,16 @@ func TestFanoutTwoString(t *testing.T) {
     }
 }
 
-// TestFanoutNInt tests a large-ish fanout setup.
-func TestFanoutNInt(t *testing.T) {
-    fanoutSize := 50
+// TestCloneFiftyInt clones the input channel fifty times.
+func TestCloneNInt(t *testing.T) {
+    count := 50
 
     inCh := make(chan int, 2)
-    inChs := Fanout(inCh, fanoutSize)
+    inChs := Clone(inCh, count)
 
-    outChs := make([]<-chan int, fanoutSize)
+    outChs := make([]<-chan int, count)
 
-    for i := 0; i < fanoutSize; i++ {
+    for i := 0; i < count; i++ {
         outChs[i] = <-inChs
     }
 
@@ -80,7 +97,7 @@ func TestFanoutNInt(t *testing.T) {
     res := []int{}
     expected := []int{}
 
-    for i := 0; i < fanoutSize; i++ {
+    for i := 0; i < count; i++ {
         res = append(res, <-outChs[i], <-outChs[i])
         expected = append(expected, 3, 2)
     }
