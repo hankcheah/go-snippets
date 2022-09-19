@@ -1,4 +1,4 @@
-package main
+package channel
 
 // Fanout forwards the message the input channel receives on to output channels that it creates.
 // It returns a channel of channels, more specifically, a read-only channel of read-only channels.
